@@ -9,7 +9,8 @@ import Modal from "./components/Modal";
 import ThemeSwitcher from "./components/ThemeSwitcher";
 import MemberContext from "./contexts/MemberContext";
 import { Attendance } from "./api/attendance/schema";
-import { headers } from "next/headers";
+import moment from "moment";
+import "moment-timezone";
 
 export default function Home() {
   const { member, setMember } = useContext(MemberContext);
@@ -176,20 +177,32 @@ export default function Home() {
           <Card radius="sm" className="w-full">
             <CardHeader className="flex gap-3">
               <p className="font-bold">
-                {shiftStartDT ? shiftStartDT.toDateString() : "UNSET"}
+                {shiftStartDT
+                  ? moment(shiftStartDT)
+                      .tz("Africa/Cairo")
+                      .format("MMMM Do YYYY")
+                  : "UNSET"}
               </p>
             </CardHeader>
             <CardBody>
               <div className="flex gap-2 items-center">
                 <p>Started At:</p>
                 <span className="text-success font-bold">
-                  {shiftStartDT ? shiftStartDT.toLocaleString() : "UNSET"}
+                  {shiftStartDT
+                    ? moment(shiftStartDT)
+                        .tz("Africa/Cairo")
+                        .format("MMMM Do YYYY, h:mm:ss a")
+                    : "UNSET"}
                 </span>
               </div>
               <div className="flex gap-2 items-center">
                 <p>Ended At:</p>
                 <span className="text-danger font-bold">
-                  {shiftEndDT ? shiftEndDT.toLocaleString() : "UNSET"}
+                  {shiftEndDT
+                    ? moment(shiftEndDT)
+                        .tz("Africa/Cairo")
+                        .format("MMMM Do YYYY, h:mm:ss a")
+                    : "UNSET"}
                 </span>
               </div>
               <div className="flex gap-2 items-center">
