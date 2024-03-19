@@ -3,6 +3,7 @@ import { env } from "process";
 import { Credentials, Tokens, credentialsSchema } from "../schema";
 
 export async function POST(request: NextRequest) {
+  console.log(request.headers);
   const body: Credentials = await request.json();
   const validation = credentialsSchema.safeParse(body);
   if (!validation.success)

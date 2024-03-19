@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAccessCookie } from "@/services/cookies-managment";
-import { Attendance } from "../schema";
 
 export async function POST(request: NextRequest) {
   let status;

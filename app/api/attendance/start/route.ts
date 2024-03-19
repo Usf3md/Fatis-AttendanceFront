@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAccessCookie } from "@/services/cookies-managment";
-import { Attendance } from "../schema";
 
 export async function POST(request: NextRequest) {
   let status;
@@ -12,6 +11,9 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
         Authorization: getAccessCookie(request),
       },
+      body: JSON.stringify({
+        local_ip: request.headers.get("x-forwarded-for"),
+      }),
     }
   );
   return NextResponse.json(await attendance.json(), { status: status });
