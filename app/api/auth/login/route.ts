@@ -32,12 +32,12 @@ export async function POST(request: NextRequest) {
     response.cookies.set("access", tokenResponse.access, {
       httpOnly: true,
       secure: false,
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 60 * 24 * 30,
     });
     response.cookies.set("refresh", tokenResponse.refresh!, {
       httpOnly: true,
       secure: false,
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 60 * 24 * 30,
     });
 
     return response;

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     response.cookies.set("access", verifyResponse.access, {
       httpOnly: true,
       secure: false,
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 60 * 24 * 30,
     });
     return response;
   }
