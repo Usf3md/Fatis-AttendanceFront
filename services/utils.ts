@@ -1,3 +1,5 @@
+import { Attendance } from "@/app/api/attendance/schema";
+
 export const getTodaysDate = () => {
   var today = new Date();
   var year = today.getFullYear();
@@ -19,20 +21,42 @@ export function convertSecondsToHMS(seconds: number) {
 }
 
 export function convertSecondsToDuration(seconds: number) {
+  if (seconds === 0) return 0 + " s";
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const remainingSeconds = seconds % 60;
 
   let duration = "";
   if (hours > 0) {
-    duration += hours + "H ";
+    duration += hours + " h ";
   }
   if (minutes > 0) {
-    duration += minutes + "M ";
+    duration += minutes + " m ";
   }
   if (remainingSeconds > 0) {
-    duration += remainingSeconds + "S";
+    duration += remainingSeconds + " s";
   }
 
   return duration.trim();
 }
+
+export const calculateDifference = (attendance: Attendance, clock: Date) => {
+  let difference;
+  if (attendance.end_datetime) {
+    difference =
+      parseInt(
+        //@ts-ignore
+        (attendance.end_datetime -
+          //@ts-ignore
+          attendance.start_datetime) /
+          1000
+      ) - attendance.shift_duration;
+  } else {
+    difference =
+      parseInt(
+        //@ts-ignore
+        (clock - attendance.start_datetime) / 1000
+      ) - attendance.shift_duration;
+  }
+  return difference;
+};

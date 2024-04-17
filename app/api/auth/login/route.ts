@@ -3,7 +3,6 @@ import { env } from "process";
 import { Credentials, Tokens, credentialsSchema } from "../schema";
 
 export async function POST(request: NextRequest) {
-  console.log(request.headers);
   const body: Credentials = await request.json();
   const validation = credentialsSchema.safeParse(body);
   if (!validation.success)
@@ -32,12 +31,12 @@ export async function POST(request: NextRequest) {
     response.cookies.set("access", tokenResponse.access, {
       httpOnly: true,
       secure: false,
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 30 * 60 * 60 * 24,
     });
     response.cookies.set("refresh", tokenResponse.refresh!, {
       httpOnly: true,
       secure: false,
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 30 * 60 * 60 * 24,
     });
 
     return response;

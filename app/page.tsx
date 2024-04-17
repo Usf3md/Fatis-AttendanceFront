@@ -1,9 +1,19 @@
 "use client";
 import {
+  calculateDifference,
   convertSecondsToDuration,
   convertSecondsToHMS,
 } from "@/services/utils";
-import { Button, Card, CardBody, CardHeader, Chip } from "@nextui-org/react";
+import {
+  Accordion,
+  AccordionItem,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Divider,
+} from "@nextui-org/react";
 import { useContext, useEffect, useState } from "react";
 import Modal from "./components/Modal";
 import ThemeSwitcher from "./components/ThemeSwitcher";
@@ -11,6 +21,7 @@ import MemberContext from "./contexts/MemberContext";
 import { Attendance } from "./api/attendance/schema";
 import moment from "moment";
 import "moment-timezone";
+import AccordionSummary from "./components/AccordionSummary";
 
 export default function Home() {
   const { member, setMember } = useContext(MemberContext);
@@ -19,8 +30,17 @@ export default function Home() {
   const [shiftStartDT, setShiftStartDT] = useState<Date>(undefined!);
   const [shiftEndDT, setShiftEndDT] = useState<Date>(undefined!);
   const [passedTime, setPassedTime] = useState(0);
+  const [clock, setClock] = useState<Date>(new Date());
 
   const shiftTime = member.shift_duration;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setClock(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
   useEffect(() => {
     const interval = setInterval(() => {
       if (!shiftStartDT) return;
@@ -82,7 +102,7 @@ export default function Home() {
           if (res.ok) return res.json();
         })
         .then((data: Attendance) =>
-          setShiftStartDT(new Date(data.start_datetime))
+          setShiftStartDT(new Date(data.start_datetime!))
         );
     };
   }
@@ -98,7 +118,9 @@ export default function Home() {
         .then((res) => {
           if (res.ok) return res.json();
         })
-        .then((data: Attendance) => setShiftEndDT(new Date(data.end_datetime)));
+        .then((data: Attendance) =>
+          setShiftEndDT(new Date(data.end_datetime!))
+        );
     };
   }
   return (
@@ -271,6 +293,119 @@ export default function Home() {
               )}
             </div>
           )}
+          <Accordion variant="splitted" className="w-full">
+            {
+              <AccordionItem
+                key={member.id}
+                aria-label={member.email}
+                title={<AccordionSummary member={member} />}
+              >
+                <div className="flex flex-col gap-6">
+                  {member.attendance_set?.map((attendance) => (
+                    <>
+                      <Divider className="my-4" />
+                      <div className="grid lg:grid-cols-4 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm">Shift Day</label>
+                          <Chip>
+                            {moment(attendance.current_date)
+                              .tz("Africa/Cairo")
+                              .format("MMMM Do YYYY")}
+                          </Chip>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm">Leave</label>
+                          {(function () {
+                            const difference = calculateDifference(
+                              attendance,
+                              clock
+                            );
+                            if (difference < 0)
+                              return (
+                                <Chip color="danger" variant="flat">
+                                  {convertSecondsToDuration(-difference)}
+                                </Chip>
+                              );
+                            else if (difference > 0)
+                              return (
+                                <Chip color="warning" variant="flat">
+                                  {convertSecondsToDuration(difference)}
+                                </Chip>
+                              );
+                            return (
+                              <Chip color="success" variant="flat">
+                                Exact
+                              </Chip>
+                            );
+                          })()}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-sm">Time Spent</label>
+                          <Chip variant="flat" color="secondary">
+                            <div className="flex gap-2">
+                              <span>
+                                {attendance.start_datetime &&
+                                  (attendance.end_datetime
+                                    ? convertSecondsToDuration(
+                                        Math.min(
+                                          parseInt(
+                                            //@ts-ignore
+                                            (attendance.end_datetime -
+                                              //@ts-ignore
+                                              attendance.start_datetime) /
+                                              1000
+                                          ),
+                                          attendance.shift_duration
+                                        )
+                                      )
+                                    : convertSecondsToDuration(
+                                        Math.min(
+                                          parseInt(
+                                            //@ts-ignore
+                                            (clock -
+                                              //@ts-ignore
+                                              attendance.start_datetime) /
+                                              1000
+                                          ),
+                                          attendance.shift_duration
+                                        )
+                                      ))}
+                              </span>
+                              /
+                              <span>
+                                {convertSecondsToDuration(
+                                  attendance.shift_duration
+                                )}
+                              </span>
+                            </div>
+                          </Chip>
+                        </div>
+                        <div>
+                          <p className="flex flex-col gap-2">
+                            <span className="text-success font-bold">
+                              {attendance.start_datetime
+                                ? moment(attendance.start_datetime)
+                                    .tz("Africa/Cairo")
+                                    .format("MMMM Do YYYY, h:mm:ss a")
+                                : "UNSET"}
+                            </span>
+                            <span className="text-danger font-bold">
+                              {attendance.end_datetime
+                                ? moment(attendance.end_datetime)
+                                    .tz("Africa/Cairo")
+                                    .format("MMMM Do YYYY, h:mm:ss a")
+                                : "UNSET"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  ))}
+                  <div></div>
+                </div>
+              </AccordionItem>
+            }
+          </Accordion>
         </div>
       </article>
     </main>

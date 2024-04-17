@@ -17,9 +17,29 @@ const AuthenticationLayout = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
   useEffect(() => {
-    fetch("/api/attendance/member/me")
+    fetch("/api/attendance/member/me/")
       .then((res) => res.json())
-      .then((data: Member) => setMember(data));
+      .then((data: Member) => {
+        console.log(data.attended_work_days);
+        const convertedData = {
+          ...data,
+          attendance_set: data.attendance_set
+            ?.map((attendance) => {
+              return {
+                ...attendance,
+                current_date: new Date(attendance.current_date),
+                start_datetime: attendance.start_datetime
+                  ? new Date(attendance.start_datetime)
+                  : undefined,
+                end_datetime: attendance.end_datetime
+                  ? new Date(attendance.end_datetime)
+                  : undefined,
+              };
+            })
+            .slice(),
+        };
+        setMember(convertedData);
+      });
   }, [isAuthenticated]);
   return (
     <>
