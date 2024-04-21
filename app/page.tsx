@@ -310,7 +310,7 @@ export default function Home() {
                           <Chip>
                             {moment(attendance.current_date)
                               .tz("Africa/Cairo")
-                              .format("MMMM Do YYYY")}
+                              .format("dddd, MMMM Do YYYY")}
                           </Chip>
                         </div>
                         <div className="flex flex-col gap-1">
